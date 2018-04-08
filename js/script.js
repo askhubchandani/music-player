@@ -1,190 +1,273 @@
-var Carousel = function ( $target )
-{
-	this.$ = {};
-	this.$.container  	    = $target;
-	this.$.carousel 		= this.$.container.find('.carousel');
-	this.$.prev 	 		= this.$.container.find('.prev');
-	this.$.next 		    = this.$.container.find('.next');
-	this.$.play 		    = this.$.container.find('.play');
-	this.$.slides_container = this.$.container.find('.slides .items');
-	this.$.slides 			= this.$.slides_container.find('.item');
-	this.$.seek_bar			= this.$.container.find('.seek-bar');
-	this.$.progress_bar		= this.$.container.find('.progress-bar');
-
-	this.$.choice			= this.$.container.find('.choice');
-	this.$.tracks 			= this.$.choice.find('.tracks');
-	this.$.track 			= this.$.tracks.find('.track');
-	this.$.speakers			= this.$.track.find('.speakers');
-	this.$.music			= this.$.container.find('.music');
-
-	this.count = this.$.slides.length;
-	this.init_events();
-};
-
-Carousel.prototype.index = 0;
-Carousel.prototype.count = 0;
-Carousel.prototype.progress_ratio = 0;
-Carousel.prototype.swipe = 0;
-
-Carousel.prototype.init_events = function (){
-	var that = this;
-
-	/* On click on the next and prev button, swipe the carousel */ 
-	this.$.next.on('click', function(){
-		that.next();
-		return false;
-	});
-	this.$.prev.on('click', function(){
-		that.prev();
-		return false;
-	});
-
-	/* We click on one track name, change to that music and that image */ 
-	this.$.track.each(function (data) {
-       	$(this).on('click', function (){
-       		
-       		that.go_to( data, $carousel.index);
-       	});
-    });
-
-	this.changeMusic();
 
 
-	/* CHECK WHEN WE CHANGE MUSIC ON KEYBOARD */
-	$(window).keydown(function(evt) {
-		if (evt.which == 39) {
-			that.next();
-			return false;
-	  	}
-	  	if (evt.which == 37) {
-			that.prev();
-			return false;
-	  	}
-	  	if (evt.which == 32) {
-	  		play = !play;
-			that.changeMusic();
-			return false;
-	  	}
-	});
+/* SCROLL BAR */ 
 
-	/* CHECK WHEN WE PAUSE BY CLICKING ON THE IMAGE */
-	this.$.play.on('click', function(){
-		play = !play;
-		that.changeMusic();
-		return false;
-	});
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    
+
+}
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: rgba(150,150,150,0.8);  
+}
 
 
-	this.$.speakers.on('click', function(){
-		if (that.$.music[0].volume == 1) {
-			that.$.music[0].volume = 0;
-			that.$.speakers.css({
-				"background-image": "url(http://audeficheux.com/projects/carousel/src/images/mute.png)"
-			});
-		}
-		else {
-			that.$.music[0].volume = 1;
-			that.$.speakers.css({
-				"background-image": "url(http://audeficheux.com/projects/carousel/src/images/speaker.png)"
-			});
-		}
-	});
-
-	/* CHECK WHEN THE MUSIC ENDS */ 
-	this.$.music.bind('ended', function(){
-		that.next();
-	});
 
 
-	/* FOR THE TOUCH CONTROL */
-	this.$.carousel.on('touchstart',function(e){
-		that.swipe = e.originalEvent.touches[0].clientX;
-	});
+body {
+	background:#eee;
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+}
 
-	this.$.carousel.on('touchend',function(e){
-		if (e.originalEvent.changedTouches[0].clientX > that.swipe + 10)
-			that.prev();
-		else if (e.originalEvent.changedTouches[0].clientX < that.swipe - 10)
-			that.next();
-		/* The + / - 10 allows to not swipe when we touch the screen without purpose*/
-	});
+.container {
+	margin: auto;
+	margin-top: 20px;
+  margin-bottom: 40px;
+	width: 300px;
+	-moz-box-shadow: 3px 3px 45px 10px #555;
+	-webkit-box-shadow: 3px 3px 45px 10px #555;
+	-o-box-shadow: 3px 3px 45px 10px #555;
+	box-shadow: 3px 3px 45px 10px #555;
+}
+
+.carousel {
+	width: 300px;
+	height: 325px;
+	position: relative;
+	background-image:url(http://audeficheux.com/projects/carousel/src/images/background0.png);
+	background-size: cover;
+	transition: background-image 0.5s ease;
+}
+
+/*Slides*/
+
+.carousel .slides{
+	position: absolute;
+	top:0px;
+	right: 0px;
+	bottom:0;
+	left:0;
+	overflow: hidden;
+}
+
+.carousel .slides .items {
+	position: relative;
+	width: 10000px;
+	font-size:0;
+	padding-left: 37.5px;
+	transition: all ease-out 0.3s;
+}
+
+.carousel .slides .item {
+	margin: 25px 12.5px;
+	width: 200px;
+	height: 300px;
+	display: inline-block;
+	background-repeat: no-repeat;
+}
+.carousel .slides .item .image {
+	height: 200px;
+	width: 200px;
+	-moz-box-shadow: 6px 9px 20px #111;
+	-webkit-box-shadow: 6px 9px 20px #111;
+	-o-box-shadow: 6px 9px 20px #111;
+	box-shadow: 6px 9px 20px #111;
+}
 
 
-	/**** SEEK BAR ****/
-	window.setInterval(function () {
-		this.progress_ratio = that.$.music[0].currentTime / that.$.music[0].duration;
-	    that.$.progress_bar.css({
-		  transform: "scaleX(" + progress_ratio + ")"
-		});
-	}, 50);
+.carousel .slides .item p {
+	font-size: 12px;
+	color: white;
+	width: 200px;
+	position: absolute;
+	top: 250px;
+	text-align: center;
+}
 
-	/* Allows to change the current time of the song */ 
-	this.$.seek_bar.on('click', function (e) {
-	        var x = e.clientX - that.$.seek_bar.offset().left,
-	        ratio = x / that.$.seek_bar.width(),
-	        time = ratio * that.$.music[0].duration;
-	    that.$.music[0].currentTime = time;
-	});
+.carousel .slides .item .artist {
+	font-weight: 300;
+	font-size: 16px;
+	height: 25px;
+}
 
-};
+.carousel .slides .item .track {
+	font-weight: 500;
+	font-size: 14px;
+	top : 275px;
+}
 
 
-Carousel.prototype.next = function()
-{
-	this.go_to( this.index + 1, this.index);
-};
 
-Carousel.prototype.prev = function()
-{
-	this.go_to( this.index - 1, this.index);
 
-};
+/*Siblings*/
 
-Carousel.prototype.go_to = function( index, currentIndex )
-{	
-	if (currentIndex != index) { //Avoid to start over the audio by clicking on the current music and mute the audio
+.carousel .siblings .sibling{
+	position: absolute;
+	width: 25px;
+	height: 200px;
+	top: 25px;
+	background: transparent;
+	text-align: center;
+	line-height:40px;
+	text-decoration: none;
+}
 
-		index = index%this.count;
-		if (index < 0)
-			index = index + this.count;
+.carousel .siblings .sibling.prev{
+	left:0px;
+}
+.carousel .siblings .sibling.next{
+	right:0px;
+}
 
-		this.$.carousel.css({
-			"background-image": "url(http://audeficheux.com/projects/carousel/src/images/background" + index + ".png)"
-		});
+.carousel .siblings .play{
+	position: absolute;
+	width: 200px;
+	height: 200px;
+	top: 25px;
+	left: 50px;
+	background-image: url(http://audeficheux.com/projects/carousel/src/images/play.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	text-align: center;
+	line-height:40px;
+	text-decoration: none;
+	transition: all 0.8s ease;
+}
 
-		/* Make visible or invisible the speakers*/
-		this.$.speakers[currentIndex].classList.add('invisible');
-		this.$.speakers[index].classList.remove('invisible');
+.carousel .siblings .play.invisible{
+	background-image: none;
+	transition: all 0.8s ease;
+}
 
-		/* Change the source of the music */
-		this.$.music[0].setAttribute('src', 'http://audeficheux.com/projects/carousel/src/medias/' + index + '.mp3');
-		this.changeMusic();
+.carousel .siblings .play.invisible:hover{
+	background-image: url(http://audeficheux.com/projects/carousel/src/images/pause.png);;
+}
 
-		/* Make the scroll follow the current music */
-		$carousel.$.tracks.animate({scrollTop:50*index - 50},300);
 
-		/* Animate the slider */ 
-		this.$.slides_container.css({
-		  transform: "translateX(" + (-225)*index + "px)"
-		});
-		this.index = index;
+/*Seek Bar */
 
-	}
-};
+.carousel .seek-bar {
+	position: absolute;
+	top: 315px;
+	width: 100%;
+	height: 10px;
+	background-color: rgba(0,0,0,0.2);
+}
 
-Carousel.prototype.changeMusic = function()
-{	
-	/* Play or pause the music */ 	
-	if (play == true) {
-		this.$.play[0].classList.add('invisible');
-		this.$.music[0].play();
-	}
-	else {
-		this.$.play[0].classList.remove('invisible');
-		this.$.music[0].pause();
-	}
-};
+.carousel .seek-bar .progress-bar {
+	background-color: rgba(30,30,30,0.6);
+	width: 100%;
+	height: 100%;
+	-webkit-transform: scaleX(0);
+	   -moz-transform: scaleX(0);
+	    -ms-transform: scaleX(0);
+	     -o-transform: scaleX(0);
+	        transform: scaleX(0);
+	-webkit-transform-origin: 0;
+	   -moz-transform-origin: 0;
+	    -ms-transform-origin: 0;
+	     -o-transform-origin: 0;
+	        transform-origin: 0;
+	-webkit-transition: transform 0.2s;
+	   -moz-transition: transform 0.2s;
+	    -ms-transition: transform 0.2s;
+	     -o-transition: transform 0.2s;
+	        transition: transform 0.2s;
+}
 
-var $carousel = new Carousel( $('.container ') );
 
-var play = false
+/* SONG LIST */
+
+
+.container .choice {
+	width: 300px;
+	height: 200px;
+	background-color: white;
+}
+
+.container .choice .tracks {
+	height: 170px;
+	overflow: scroll;
+
+}
+
+
+.container .choice .title{
+	width: 290px;
+	height: 30px;
+	border-bottom: 1px solid #ccc;
+	padding-left: 10px;
+}
+
+.container .choice .title p{
+	height: 30px;
+	line-height: 30px;
+	vertical-align: middle;
+	color: #555;
+	font-size: 10px;
+}
+
+
+.container .choice .track{
+	width: 250px;
+	margin: auto;
+	height: 50px;
+	border-bottom: 1px solid #ccc;
+	padding-left: 10px;
+	font-weight: 300;
+	cursor: pointer;
+}
+
+.container .choice .track div{
+	display: inline-block;
+}
+
+.container .choice .track .number{
+	line-height: 50px;
+}
+
+.container .choice .track .name{
+	height: 30px;
+	vertical-align: middle;
+	padding-left: 25px;
+}
+
+.container .choice .track .name .song{
+	margin-top: 4px;
+	font-size: 12px;
+}
+
+.container .choice .track .speakers{
+	height: 20px;
+	width: 20px;
+	background-image: url(http://audeficheux.com/projects/carousel/src/images/speaker.png);
+	background-repeat: no-repeat;
+	vertical-align: middle;
+	float: right;
+	margin-top: 15px;
+}
+
+.container .choice .track .speakers.invisible{
+	display: none;
+}
+
+
+.credits {
+  width:250px;
+  text-align: center;
+  margin: auto;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #555;
+}
+
+.credits a {
+  text-decoration: none;
+  color: black;
+}
